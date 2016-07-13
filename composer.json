@@ -1,0 +1,11 @@
+{
+    "name": "damner/db",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "den",
+            "email": "denis.vinokurov@gmail.com"
+        }
+    ],
+    "require": {}
+}
