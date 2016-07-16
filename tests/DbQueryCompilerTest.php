@@ -26,51 +26,51 @@ class QueryCompilerTest extends \PHPUnit_Framework_TestCase {
 	 * @dataProvider providerSinglePlaceholder
 	 */
 	public function testSinglePlaceholder($query, $argument, $result) {
-		$this->assertSame($result, self::$compiler->compile($query, [$argument]));
+		$this->assertSame($result, self::$compiler->compile($query, array($argument)));
 	}
 
 	public function providerSinglePlaceholder() {
-		return [
-			['?', 0, '\'0\''],
-			['?', 1, '\'1\''],
-			['?', -1, '\'-1\''],
-			['?', PHP_INT_MAX , '\''.PHP_INT_MAX .'\''],
-			['?', 0.0, '\'0\''],
-			['?', 1.1, '\'1.1\''],
-			['?', -1.1, '\'-1.1\''],
-			['?', true, '\'1\''],
-			['?', false, '\'0\''],
-			['?', null, 'NULL'],
-			['?', 'NULL', 'NULL'],
-			['?', '', '\'\''],
-			['?', 'a?\'"', '\'a?\\\'\\"\''],
-			['?', 'йё', '\'йё\''],
+		return array(
+			array('?', 0, '\'0\''),
+			array('?', 1, '\'1\''),
+			array('?', -1, '\'-1\''),
+			array('?', PHP_INT_MAX , '\''.PHP_INT_MAX .'\''),
+			array('?', 0.0, '\'0\''),
+			array('?', 1.1, '\'1.1\''),
+			array('?', -1.1, '\'-1.1\''),
+			array('?', true, '\'1\''),
+			array('?', false, '\'0\''),
+			array('?', null, 'NULL'),
+			array('?', 'NULL', 'NULL'),
+			array('?', '', '\'\''),
+			array('?', 'a?\'"', '\'a?\\\'\\"\''),
+			array('?', 'йё', '\'йё\''),
 
-			['?N', 'NULL', 'NULL'],
-			['?N', '', ''],
-			['?N', 'a', 'a'],
+			array('?N', 'NULL', 'NULL'),
+			array('?N', '', ''),
+			array('?N', 'a', 'a'),
 
-			['?F', 'a` ', '`a```'],
-			['?F', 'йё', '`йё`'],
-			['?F', 1, '`1`'],
+			array('?F', 'a` ', '`a```'),
+			array('?F', 'йё', '`йё`'),
+			array('?F', 1, '`1`'),
 
-			['?L', '', ''],
-			['?L', 'a%_\'"', 'a\\%\\_\\\'\\"'],
+			array('?L', '', ''),
+			array('?L', 'a%_\'"', 'a\\%\\_\\\'\\"'),
 
-			['?@', [], 'NULL'],
-			['?@', [1], '\'1\''],
-			['?@', [1, 2], '\'1\',\'2\''],
-			['?@', ['1', '2'], '\'1\',\'2\''],
-			['?@', [null, 'NULL', true, false, 0, -1.1, '', '?'], 'NULL,NULL,\'1\',\'0\',\'0\',\'-1.1\',\'\',\'?\''],
+			array('?@', array(), 'NULL'),
+			array('?@', array(1), '\'1\''),
+			array('?@', array(1, 2), '\'1\',\'2\''),
+			array('?@', array('1', '2'), '\'1\',\'2\''),
+			array('?@', array(null, 'NULL', true, false, 0, -1.1, '', '?'), 'NULL,NULL,\'1\',\'0\',\'0\',\'-1.1\',\'\',\'?\''),
 
-			['?@F', [], ''],
-			['?@F', [1], '`1`'],
-			['?@F', ['a` '], '`a```'],
-			['?@F', ['a', 'b'], '`a`,`b`'],
+			array('?@F', array(), ''),
+			array('?@F', array(1), '`1`'),
+			array('?@F', array('a` '), '`a```'),
+			array('?@F', array('a', 'b'), '`a`,`b`'),
 
-			['?%', [], ''],
-			['?%', ['a' => '', 'b' => null, 'c' => true, 'd' => 1, 'e' => -1.1], '`a`=\'\',`b`=NULL,`c`=\'1\',`d`=\'1\',`e`=\'-1.1\''],
-		];
+			array('?%', array(), ''),
+			array('?%', array('a' => '', 'b' => null, 'c' => true, 'd' => 1, 'e' => -1.1), '`a`=\'\',`b`=NULL,`c`=\'1\',`d`=\'1\',`e`=\'-1.1\''),
+		);
 	}
 
 	/**
@@ -81,10 +81,10 @@ class QueryCompilerTest extends \PHPUnit_Framework_TestCase {
 	}
 
 	public function providerMultiplePlaceholders() {
-		return [
-			['?', [null, 1, 2, 3, 4, 5], 'NULL'],
-			['? ?N ?F ?L ?@ ?@F ?%', ['a', 'a', 'a', 'a', ['a'], ['a'], ['a' => 'a']], '\'a\' a `a` a \'a\' `a` `a`=\'a\''],
-		];
+		return array(
+			array('?', array(null, 1, 2, 3, 4, 5), 'NULL'),
+			array('? ?N ?F ?L ?@ ?@F ?%', array('a', 'a', 'a', 'a', array('a'), array('a'), array('a' => 'a')), '\'a\' a `a` a \'a\' `a` `a`=\'a\''),
+		);
 	}
 
 	/**
@@ -92,69 +92,69 @@ class QueryCompilerTest extends \PHPUnit_Framework_TestCase {
 	 * @expectedException Db\Exceptions\QueryCompilerException
 	 */
 	public function testSinglePlaceholderError($query, $argument) {
-		self::$compiler->compile($query, [$argument]);
+		self::$compiler->compile($query, array($argument));
 	}
 
 	public function providerSinglePlaceholderError() {
-		return [
-			['?', []],
-			['?', new stdClass],
+		return array(
+			array('?', array()),
+			array('?', new stdClass),
 
-			['?N', []],
-			['?N', new stdClass],
-			['?N', null],
-			['?N', true],
-			['?N', 1],
-			['?N', 1.1],
+			array('?N', array()),
+			array('?N', new stdClass),
+			array('?N', null),
+			array('?N', true),
+			array('?N', 1),
+			array('?N', 1.1),
 
-			['?F', []],
-			['?F', new stdClass],
-			['?F', null],
-			['?F', true],
-			['?F', 1.1],
-			['?F', ''],
-			['?F', ' '],
-			['?F', '*'],
+			array('?F', array()),
+			array('?F', new stdClass),
+			array('?F', null),
+			array('?F', true),
+			array('?F', 1.1),
+			array('?F', ''),
+			array('?F', ' '),
+			array('?F', '*'),
 
-			['?L', []],
-			['?L', new stdClass],
-			['?L', null],
-			['?L', true],
-			['?L', 1],
-			['?L', 1.1],
+			array('?L', array()),
+			array('?L', new stdClass),
+			array('?L', null),
+			array('?L', true),
+			array('?L', 1),
+			array('?L', 1.1),
 
-			['?@', new stdClass],
-			['?@', null],
-			['?@', true],
-			['?@', 1],
-			['?@', 1.1],
-			['?@', ''],
-			['?@', [[]]],
-			['?@', [new stdClass]],
+			array('?@', new stdClass),
+			array('?@', null),
+			array('?@', true),
+			array('?@', 1),
+			array('?@', 1.1),
+			array('?@', ''),
+			array('?@', array(array())),
+			array('?@', array(new stdClass)),
 
-			['?@F', [[]]],
-			['?@F', [new stdClass]],
-			['?@F', [null]],
-			['?@F', [true]],
-			['?@F', [1.1]],
-			['?@F', ['']],
-			['?@F', [' ']],
-			['?@F', ['*']],
+			array('?@F', array(array())),
+			array('?@F', array(new stdClass)),
+			array('?@F', array(null)),
+			array('?@F', array(true)),
+			array('?@F', array(1.1)),
+			array('?@F', array('')),
+			array('?@F', array(' ')),
+			array('?@F', array('*')),
 
-			['?%', new stdClass],
-			['?%', null],
-			['?%', true],
-			['?%', 1],
-			['?%', 1.1],
-			['?%', ''],
-			['?%', [[]]],
-			['?%', [new stdClass]],
-			['?%', ['' => 1]],
-			['?%', [' ' => 1]],
-			['?%', ['*' => 1]],
-			['?%', ['a' => new stdClass]],
-			['?%', ['a' => []]],
-		];
+			array('?%', new stdClass),
+			array('?%', null),
+			array('?%', true),
+			array('?%', 1),
+			array('?%', 1.1),
+			array('?%', ''),
+			array('?%', array(array())),
+			array('?%', array(new stdClass)),
+			array('?%', array('' => 1)),
+			array('?%', array(' ' => 1)),
+			array('?%', array('*' => 1)),
+			array('?%', array('a' => new stdClass)),
+			array('?%', array('a' => array())),
+		);
 	}
 
 	/**
@@ -166,17 +166,17 @@ class QueryCompilerTest extends \PHPUnit_Framework_TestCase {
 	}
 
 	public function providerMultiplePlaceholdersError() {
-		return [
-			['?', []],
-			['?N', []],
-			['?F', []],
-			['?L', []],
-			['?@', []],
-			['?@F', []],
-			['?%', []],
+		return array(
+			array('?', array()),
+			array('?N', array()),
+			array('?F', array()),
+			array('?L', array()),
+			array('?@', array()),
+			array('?@F', array()),
+			array('?%', array()),
 
-			['? ?N ?F ?L ?@ ?@F ?%', []],
-		];
+			array('? ?N ?F ?L ?@ ?@F ?%', array()),
+		);
 	}
 
 }
