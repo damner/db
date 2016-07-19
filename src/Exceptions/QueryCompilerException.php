@@ -2,5 +2,6 @@
 
 namespace Db\Exceptions;
 
-class QueryCompilerException extends RuntimeException {
+class QueryCompilerException extends RuntimeException
+{
 }

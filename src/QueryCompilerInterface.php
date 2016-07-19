@@ -2,7 +2,8 @@
 
 namespace Db;
 
-interface QueryCompilerInterface {
-	public function setEscaperFunction($escaper);
-	public function compile($query, array $arguments);
+interface QueryCompilerInterface
+{
+    public function setEscaperFunction($escaper);
+    public function compile($query, array $arguments);
 }

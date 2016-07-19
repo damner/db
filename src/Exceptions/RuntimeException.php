@@ -2,5 +2,6 @@
 
 namespace Db\Exceptions;
 
-class RuntimeException extends \RuntimeException {
+class RuntimeException extends \RuntimeException
+{
 }
