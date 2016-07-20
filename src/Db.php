@@ -339,7 +339,7 @@ class Db implements DbInterface, CompilableQueryInterface, Serializable
         return $this->getConnection()->affected_rows;
     }
 
-    // Выполняет sql-запрос и возвращает идентификатор вставленной записи
+    // Run query and return last inserted id.
     public function insert($query)
     {
         $query = $this->getCompiledQuery(func_get_args());
@@ -349,7 +349,7 @@ class Db implements DbInterface, CompilableQueryInterface, Serializable
         return $this->getInsertedId();
     }
 
-    // Создаёт несколько записей в таблице
+    // Run query to insert multiple rows.
     public function insertRows($table, array $rows)
     {
         if (!count($rows)) {
@@ -364,7 +364,7 @@ class Db implements DbInterface, CompilableQueryInterface, Serializable
         return $this->query('INSERT INTO ?F (?@F) VALUES ?N', $table, array_keys(reset($rows)), implode(',', $sql_parts));
     }
 
-    // Заменяет или создаёт несколько записей в таблице
+    // Run query to replace multiple rows.
     public function replaceRows($table, array $rows)
     {
         if (!count($rows)) {
@@ -379,7 +379,7 @@ class Db implements DbInterface, CompilableQueryInterface, Serializable
         return $this->query('REPLACE INTO ?F (?@F) VALUES ?N', $table, array_keys(reset($rows)), implode(',', $sql_parts));
     }
 
-    // Создаёт таблицу
+    // Run query to create database table.
     public function createTable($table, array $fields, $engine = null, $comment = null)
     {
         $primary = array();
@@ -419,16 +419,17 @@ class Db implements DbInterface, CompilableQueryInterface, Serializable
         $this->query($this->getCompiledQuery('CREATE TABLE ?F', $table).' ('.$query.')'.$engine.$comment.$charset);
     }
 
-    // Измененяет структуры таблицы
+    // Run query to alter database table.
     public function alterTable($table, array $changes)
     {
         $queries = array();
 
-        // Добавление
+        // Add fields
         if (isset($changes['add'])) {
             foreach ($changes['add'] as $name => $field) {
                 $queries[] = ' ADD '.$this->getFieldDeclaration($field['type'], $name, $field);
-                // Добавление FOREIGN KEY
+
+                // Add new foreign key
                 if (isset($field['add_foreign_key'])) {
                     $sql_ondelete = $field['add_foreign_key']['ondelete'] !== null ? ' ON DELETE '.$field['add_foreign_key']['ondelete'] : '';
                     $sql_onupdate = $field['add_foreign_key']['onupdate'] !== null ? ' ON UPDATE '.$field['add_foreign_key']['onupdate'] : '';
@@ -438,12 +439,12 @@ class Db implements DbInterface, CompilableQueryInterface, Serializable
             }
         }
 
-        // Удаление
+        // Remove fields
         if (isset($changes['drop'])) {
             foreach ($changes['drop'] as $name => $field) {
                 $queries[] = $this->getCompiledQuery(' DROP ?F', $name);
 
-                // Удаление старых FOREIGN KEYS
+                // Remove old foreign keys
                 foreach ($this->getForeignKeys($table) as $key) {
                     if ($key['field'] === $name) {
                         $queries[] = $this->getCompiledQuery(' DROP FOREIGN KEY ?F', $key['name']);
@@ -452,7 +453,7 @@ class Db implements DbInterface, CompilableQueryInterface, Serializable
             }
         }
 
-        // Изменение
+        // Change fields
         if (isset($changes['change'])) {
             foreach ($changes['change'] as $name => $field) {
                 if (empty($field['name'])) {
@@ -460,7 +461,7 @@ class Db implements DbInterface, CompilableQueryInterface, Serializable
                 }
                 $queries[] = $this->getCompiledQuery(' CHANGE ?F ', $name).$this->getFieldDeclaration($field['type'], $field['name'], $field);
 
-                // Удаление старых FOREIGN KEYS
+                // Remove old foreign keys
                 if (!empty($field['drop_foreign_keys']) || isset($field['add_foreign_key'])) {
                     foreach ($this->getForeignKeys($table) as $key) {
                         if ($key['field'] === $name) {
@@ -468,7 +469,7 @@ class Db implements DbInterface, CompilableQueryInterface, Serializable
                         }
                     }
                 }
-                // Добавление FOREIGN KEY
+                // Add new foreign key
                 if (isset($field['add_foreign_key'])) {
                     $sql_ondelete = $field['add_foreign_key']['ondelete'] !== null ? ' ON DELETE '.$field['add_foreign_key']['ondelete'] : '';
                     $sql_onupdate = $field['add_foreign_key']['onupdate'] !== null ? ' ON UPDATE '.$field['add_foreign_key']['onupdate'] : '';
@@ -485,7 +486,7 @@ class Db implements DbInterface, CompilableQueryInterface, Serializable
         return $this->query($this->getCompiledQuery('ALTER TABLE ?F', $table).$rename.implode(',', $queries).$engine.$comment);
     }
 
-    // Возвращает часть sql-запроса, описывающего поле
+    // Return sql field declaration.
     protected function getFieldDeclaration($type, $name, array $field)
     {
         if (isset($field['length'])) {
@@ -516,19 +517,19 @@ class Db implements DbInterface, CompilableQueryInterface, Serializable
         return $this->getCompiledQuery('?F ', $name).mb_strtoupper($type).@$length.@$default.@$unsigned.@$zerofill.@$binary.@$notnull.@$auto_increment.@$comment;
     }
 
-    // Удаляет таблицу
+    // Run query to drop table.
     public function dropTable($table)
     {
         $this->query('DROP TABLE ?F', $table);
     }
 
-    // Копирует таблицу
+    // Run query to copy table.
     public function copyTable($old_table, $new_table)
     {
         $this->query('CREATE TABLE ?F LIKE ?F', $new_table, $old_table);
     }
 
-    // Возвращает внешние ключи таблицы
+    // Returns foreign keys of table.
     public function getForeignKeys($table)
     {
         $row = $this->getRow('SHOW CREATE TABLE ?F', $table);
@@ -562,7 +563,7 @@ class Db implements DbInterface, CompilableQueryInterface, Serializable
         return $keys;
     }
 
-    // Создаёт внешний ключ таблицы
+    // Run query to create new foreign key.
     public function addForeignKey($table, $field, $foreign_table, $foreign_field, $name, $ondelete, $onupdate)
     {
         $sql_name = $name !== null ? $this->getCompiledQuery(' CONSTRAINT ?F', $name) : '';
@@ -572,26 +573,23 @@ class Db implements DbInterface, CompilableQueryInterface, Serializable
         return $this->query('ALTER TABLE ?F ADD?N FOREIGN KEY (?F) REFERENCES ?F (?F) ?N ?N', $table, $sql_name, $field, $foreign_table, $foreign_field, $sql_ondelete, $sql_onupdate);
     }
 
-    // Удаляет внешний ключ таблицы
+    // Run query to remove foreign key.
     public function dropForeignKey($table, $key)
     {
         return $this->query('ALTER TABLE ?F DROP FOREIGN KEY ?F', $table, $key);
     }
 
-    // Возвращает SQL-подзапрос поиска строки
+    // Return search subquery.
     public function getSearchSql($string, $field_name, $type = 'OR', $min_word_length = null)
     {
         $string = preg_replace('/[^0-9a-zа-яёЁ_\\-:#@$%*()\\[\\]{}?<>\\s]/iu', '', $string);
 
-        // Минимальная длина слова
         if ($min_word_length > 1) {
             $string = preg_replace('/(^|\s)\S{1,'.($min_word_length - 1).'}(\s|$)/u', ' ', $string);
         }
 
-        // Спецсимволы
         $string = addcslashes($string, '_%');
 
-        // Удаляем лишние пробелы
         $string = preg_replace('/\\s+/u', ' ', $string);
         $string = trim($string);
 
@@ -599,7 +597,6 @@ class Db implements DbInterface, CompilableQueryInterface, Serializable
             return false;
         }
 
-        // Тип поиска (AND/OR)
         if ($type) {
             $string = str_replace(' ', '%" '.$type.' '.$field_name.' LIKE "%', $string);
         }

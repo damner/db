@@ -83,14 +83,14 @@ class QueryCompiler implements QueryCompilerInterface, Serializable
 
             $a = $arguments[$key];
 
-            // Скалярный
+            // Scalar
             if ($type === '') {
                 $out .= $this->compileScalarValue($a);
 
                 continue;
             }
 
-            // Просто подставляем
+            // No escaping
             if ($type === 'N') {
                 if (!is_string($a)) {
                     throw new QueryCompilerException(sprintf('Передано не строковое значение в плейсхолдер №%d.', $key + 1));
@@ -101,14 +101,14 @@ class QueryCompiler implements QueryCompilerInterface, Serializable
                 continue;
             }
 
-            // Поле
+            // Field
             if ($type === 'F') {
                 $out .= $this->compileKey($a);
 
                 continue;
             }
 
-            // использовать так "field LIKE '%?L%'"
+            // Usage: "field LIKE '%?L%'"
             if ($type === 'L') {
                 if (!is_string($a)) {
                     throw new QueryCompilerException(sprintf('Передано не строковое значение в плейсхолдер №%d.', $key + 1));
@@ -119,7 +119,7 @@ class QueryCompiler implements QueryCompilerInterface, Serializable
                 continue;
             }
 
-            // Список значений
+            // List values
             if ($type === '@') {
                 if (!is_array($a)) {
                     throw new QueryCompilerException(sprintf('Передан не массив в плейсхолдер №%d.', $key + 1));
@@ -138,7 +138,7 @@ class QueryCompiler implements QueryCompilerInterface, Serializable
                 continue;
             }
 
-            // Список полей
+            // List fields
             if ($type === '@F') {
                 if (!is_array($a)) {
                     throw new QueryCompilerException(sprintf('Передан не массив в плейсхолдер №%d.', $key + 1));
@@ -153,7 +153,7 @@ class QueryCompiler implements QueryCompilerInterface, Serializable
                 continue;
             }
 
-            // Ассоциативный массив значений
+            // Assoc fields
             if ($type === '%') {
                 if (!is_array($a)) {
                     throw new QueryCompilerException(sprintf('Передан не массив в плейсхолдер №%d.', $key + 1));
