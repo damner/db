@@ -78,7 +78,7 @@ class QueryCompiler implements QueryCompilerInterface, Serializable
             $pos = $start + mb_strlen($type) + 1;
 
             if (!array_key_exists($key, $arguments)) {
-                throw new QueryCompilerException(sprintf('Плейсхолдер №%d не указан.', $key + 1));
+                throw new QueryCompilerException(sprintf('Placeholder #%d is not exists.', $key + 1));
             }
 
             $a = $arguments[$key];
@@ -93,7 +93,7 @@ class QueryCompiler implements QueryCompilerInterface, Serializable
             // No escaping
             if ($type === 'N') {
                 if (!is_string($a)) {
-                    throw new QueryCompilerException(sprintf('Передано не строковое значение в плейсхолдер №%d.', $key + 1));
+                    throw new QueryCompilerException(sprintf('Not a string value for placeholder #%d.', $key + 1));
                 }
 
                 $out .= $a;
@@ -111,7 +111,7 @@ class QueryCompiler implements QueryCompilerInterface, Serializable
             // Usage: "field LIKE '%?L%'"
             if ($type === 'L') {
                 if (!is_string($a)) {
-                    throw new QueryCompilerException(sprintf('Передано не строковое значение в плейсхолдер №%d.', $key + 1));
+                    throw new QueryCompilerException(sprintf('Not a string value for placeholder #%d.', $key + 1));
                 }
 
                 $out .= addcslashes($this->escape($a), '%_');
@@ -122,7 +122,7 @@ class QueryCompiler implements QueryCompilerInterface, Serializable
             // List values
             if ($type === '@') {
                 if (!is_array($a)) {
-                    throw new QueryCompilerException(sprintf('Передан не массив в плейсхолдер №%d.', $key + 1));
+                    throw new QueryCompilerException(sprintf('Not an array for placeholder #%d.', $key + 1));
                 }
 
                 if (count($a)) {
@@ -141,7 +141,7 @@ class QueryCompiler implements QueryCompilerInterface, Serializable
             // List fields
             if ($type === '@F') {
                 if (!is_array($a)) {
-                    throw new QueryCompilerException(sprintf('Передан не массив в плейсхолдер №%d.', $key + 1));
+                    throw new QueryCompilerException(sprintf('Not an array for placeholder #%d.', $key + 1));
                 }
 
                 foreach ($a as $k => $v) {
@@ -156,7 +156,7 @@ class QueryCompiler implements QueryCompilerInterface, Serializable
             // Assoc fields
             if ($type === '%') {
                 if (!is_array($a)) {
-                    throw new QueryCompilerException(sprintf('Передан не массив в плейсхолдер №%d.', $key + 1));
+                    throw new QueryCompilerException(sprintf('Not an array for placeholder #%d.', $key + 1));
                 }
 
                 foreach ($a as $k => $v) {
