@@ -13,12 +13,48 @@ use Db\Exceptions\QueryException;
 
 class Db implements DbInterface, CompilableQueryInterface, Serializable
 {
+    /**
+     * Connection params.
+     *
+     * @var array
+     */
     protected $data = array();
+
+    /**
+     * Mysqli connection instance.
+     *
+     * @var mysqli
+     */
     protected $connection;
+
+    /**
+     * Query compiler instance.
+     *
+     * @var QueryCompilerInterface
+     */
     protected $compiler;
+
+    /**
+     * Logger instance.
+     *
+     * @var LoggerInterface
+     */
     protected $logger;
+
+    /**
+     * Current transaction nesting level.
+     *
+     * @var LoggerInterface
+     */
     protected $transactions = 0;
 
+    /**
+     * Constructor.
+     *
+     * @param array                  $data     Connection params.
+     * @param QueryCompilerInterface $compiler Query compiler.
+     * @param LoggerInterface        $logger   Logger.
+     */
     public function __construct(array $data, QueryCompilerInterface $compiler, LoggerInterface $logger)
     {
         $this->setData($data);
@@ -28,17 +64,32 @@ class Db implements DbInterface, CompilableQueryInterface, Serializable
         $this->logger = $logger;
     }
 
+    /**
+     * Sets connection params.
+     *
+     * @param array $data Connection params.
+     */
     public function setData(array $data)
     {
         $this->data = $data + $this->data;
     }
 
+    /**
+     * Sets query compiler.
+     *
+     * @param QueryCompilerInterface $compiler Query compiler.
+     */
     protected function setQueryCompiler(QueryCompilerInterface $compiler)
     {
         $this->compiler = $compiler;
         $this->compiler->setEscaperFunction(array($this, 'escape'));
     }
 
+    /**
+     * Initializes the connection.
+     *
+     * @throws ConnectionException if connection fails.
+     */
     public function connect()
     {
         $host = $this->data['host'];
@@ -73,6 +124,11 @@ class Db implements DbInterface, CompilableQueryInterface, Serializable
         }
     }
 
+    /**
+     * Returns logger.
+     *
+     * @return LoggerInterface
+     */
     public function getLogger()
     {
         return $this->logger;
